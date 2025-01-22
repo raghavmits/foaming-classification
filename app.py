@@ -8,7 +8,7 @@ from torchvision import models, transforms
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = models.resnet18(pretrained=False)  # Load model architecture without pretrained weights
 model.fc = torch.nn.Linear(in_features=model.fc.in_features, out_features=2)  # Modify for 2 classes
-model.load_state_dict(torch.load("resnet_reactor_model.pth", map_location=device))  # Load task-specific weights
+model.load_state_dict(torch.load("./model_weights/resnet_reactor_model.pth", map_location=device))  # Load task-specific weights
 model = model.to(device)
 model.eval()  # Set model to evaluation mode
 
