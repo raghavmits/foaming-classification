@@ -66,6 +66,12 @@ def correct_image_orientation(image):
         pass  # Ignore if image has no EXIF data
     return image
 
+# API endpoint to check the health of the backend
+@app.get("/health")
+async def health_check():
+    return {"status": "OK", "message": "FastAPI backend is running!"}
+
+
 # API endpoint to predict image
 @app.post("/predict/")
 async def predict_image(file: UploadFile = File(...)):
