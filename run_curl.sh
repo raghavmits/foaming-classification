@@ -42,3 +42,5 @@ for file in "$DIRECTORY"/*.jpeg; do
   # Output the response
   echo "Response: $response"
 done
+
+
