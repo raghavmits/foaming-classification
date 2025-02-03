@@ -1,6 +1,0 @@
-aws-cdk-lib==2.173.3
-constructs>=10.0.0,<11.0.0
-gradio
-requests
-pillow
-python-multipart
