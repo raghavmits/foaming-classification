@@ -152,10 +152,3 @@ Both components include logging:
 2. Create a feature branch
 3. Submit a pull request
 
-## License
-
-[Your License Here]
-
-## Authors
-
-[Your Name/Organization]
