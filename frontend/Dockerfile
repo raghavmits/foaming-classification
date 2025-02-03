@@ -7,20 +7,11 @@ WORKDIR /app
 # Copy the requirements file into the container
 COPY requirements.txt .
 
-# Set the environment variable for the virtual environment
-ENV VIRTUAL_ENV=/app/venv
-
-# Create the virtual environment
-RUN python -m venv $VIRTUAL_ENV
-
-# Update the PATH to include the virtual environment's bin directory
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
 # Install dependencies inside the virtual environment
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application files into the container
-COPY . .
+COPY model_frontend.py .
 
 # Expose the port that the Gradio app will use (Gradio by default uses port 7860)
 EXPOSE 7860

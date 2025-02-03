@@ -23,10 +23,10 @@
 #!/bin/bash
 
 # Directory containing the JPEG files
-DIRECTORY="/Users/raghav/Downloads/NoFoaming"
+DIRECTORY="/Users/raghav/Downloads/YesFoaming"
 
 # FastAPI endpoint inside Docker
-URL="http://localhost:8000/predict/"
+URL="http://54.83.142.161:8000/predict/"
 
 # Iterate through all JPEG files in the directory
 for file in "$DIRECTORY"/*.jpeg; do
