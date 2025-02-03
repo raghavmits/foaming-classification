@@ -1,124 +1,161 @@
-# PyTorch Image Classification with Gradio Frontend
+# Reactor Foaming Classification System using Computer Vision (PyTorch)
 
-This repository contains a PyTorch-based image classification model designed to identify reactor images as either "Foaming" or "Non-Foaming." The project includes a user-friendly frontend built with Gradio, allowing users to upload images and receive predictions instantly.
+This project implements a machine learning system for classifying reactor images as either "Foaming" or "Non-Foaming". The system uses a distributed architecture with a FastAPI backend for model serving and a Gradio frontend for user interaction.
 
-## Features
+## System Architecture
 
-- **Deep Learning Model:** Utilizes a ResNet-18 architecture customized for binary classification (foaming vs. non-foaming).
-- **Gradio Frontend:** Provides an intuitive and interactive interface for users to test the model with their own images.
-- **Custom Preprocessing:** Includes preprocessing steps for resizing, normalization, and orientation correction to handle diverse image inputs.
+The system consists of two main components:
 
-## Demo
+### 1. FastAPI Backend
+- Serves a ResNet-18 model for binary classification
+- Handles image preprocessing and inference
+- Features:
+  - AWS S3 integration for model storage
+  - Image orientation correction
+  - Health check endpoint
+  - RESTful API for predictions
+  - Containerized deployment
 
-You can interact with the model using the Gradio app. Once launched, the app allows you to upload an image and get a prediction.
+### 2. Gradio Frontend
+- Provides an intuitive web interface
+- Features:
+  - Real-time image upload and prediction
+  - Automatic communication with FastAPI backend
+  - Logging system for debugging
+  - Containerized deployment
 
 ## Project Structure
 
 ```
-.
-├── model_weights
-│   └── resnet_reactor_model.pth  # Pre-trained model weights
-├── app.py                        # Gradio application code
-├── requirements.txt              # Python dependencies
-├── README.md                     # Project documentation
+FoamingClassfication/
+├── backend/
+│   ├── model_backend.py    # FastAPI server implementation
+│   ├── Dockerfile         # Backend container configuration
+│   └── requirements.txt   # Backend dependencies
+├── gradio-cdk/
+│   ├── app.py            # Gradio frontend implementation
+│   ├── Dockerfile        # Frontend container configuration
+│   └── requirements.txt  # Frontend dependencies
 ```
 
-## Getting Started
+## Prerequisites
 
-Follow these steps to set up the project on your local machine:
+- Docker
+- AWS Account with:
+  - S3 bucket access
+  - AWS credentials
+- Python 3.10
 
-### Prerequisites
+## Configuration
 
-- Python 3.8+
-- PyTorch (GPU support is optional but recommended for faster inference)
+### Backend Environment Variables
+Create a `.env` file in the backend directory:
+```
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_REGION=your_region
+```
 
-### Installation
+### Frontend Configuration
+The API endpoint URL can be configured in `app.py`:
+```python
+API_URL = "http://your-backend-url:8000/predict/"
+```
 
-1. Clone the repository:
+## Deployment
 
-    ```bash
-    git clone https://github.com/yourusername/your-repo-name.git
-    cd your-repo-name
-    ```
+### Backend Deployment
 
-2. Create a virtual environment (optional but recommended):
+1. Build the Docker image:
+```bash
+cd backend
+docker build -t foaming-classifier-backend .
+```
 
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-    ```
+2. Run the container:
+```bash
+docker run -d \
+  -p 8000:8000 \
+  --env-file .env \
+  foaming-classifier-backend
+```
 
-3. Install the required dependencies:
+### Frontend Deployment
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+1. Build the Docker image:
+```bash
+cd gradio-cdk
+docker build -t foaming-classifier-frontend .
+```
 
-### Running the Application
+2. Run the container:
+```bash
+docker run -d -p 7860:7860 foaming-classifier-frontend
+```
 
-1. Ensure the pre-trained model weights (`resnet_reactor_model.pth`) are in the `model_weights` directory.
+## API Endpoints
 
-2. Run the Gradio application:
+### Backend API
+- `GET /health`
+  - Health check endpoint
+  - Returns: `{"status": "OK", "message": "FastAPI backend is running!"}`
 
-    ```bash
-    python app.py
-    ```
-
-3. Access the application in your web browser at the URL displayed in the terminal (e.g., `http://127.0.0.1:7860`).
-
-## Model Details
-
-- **Architecture:** ResNet-18
-- **Input Size:** Images are resized to 224x224 pixels.
-- **Preprocessing:** Includes resizing, normalization, and orientation correction for better compatibility.
+- `POST /predict/`
+  - Accepts: Multipart form data with image file
+  - Returns: `{"prediction": "Foaming"/"Non-Foaming"}`
 
 ## Usage
 
-1. Launch the app.
-2. Upload an image in formats like JPEG, PNG, or HEIC.
-3. View the prediction displayed as either "Foaming" or "Non-Foaming."
+1. Access the Gradio interface at `http://localhost:7860`
+2. Upload a reactor image
+3. The system will automatically process the image and display the classification result
 
-## Key Code Snippets
+## Model Details
 
-### Model Loading
+- Architecture: ResNet-18
+- Input Size: 224x224 pixels
+- Classes: Binary (Foaming/Non-Foaming)
+- Preprocessing:
+  - Resize to 224x224
+  - Normalize using ImageNet stats
+  - EXIF orientation correction
 
-```python
-model = models.resnet18(pretrained=False)
-model.fc = torch.nn.Linear(in_features=model.fc.in_features, out_features=2)
-model.load_state_dict(torch.load("resnet_reactor_model.pth", map_location=device))
-model = model.to(device)
-model.eval()
-```
+## Error Handling
 
-### Gradio Interface
+The system includes comprehensive error handling:
+- Image validation
+- API communication errors
+- Model prediction errors
+- Logging for debugging
 
-```python
-iface = gr.Interface(
-    fn=predict_image,
-    inputs=gr.Image(type="filepath"),
-    outputs="text",
-    live=True
-)
-iface.launch(share=True)
-```
+## Monitoring
 
-## Future Work
+Both components include logging:
+- Frontend: Gradio interface actions and API communication
+- Backend: Model loading, predictions, and API requests
 
-- Enhance the model with more diverse training data for improved accuracy.
-- Add support for multi-class classification if needed.
-- Deploy the application to cloud platforms like AWS or GCP.
+## Troubleshooting
+
+1. Backend Issues:
+   - Check the health endpoint: `curl http://localhost:8000/health`
+   - Verify AWS credentials
+   - Check Docker logs: `docker logs <backend-container-id>`
+
+2. Frontend Issues:
+   - Verify backend URL configuration
+   - Check Docker logs: `docker logs <frontend-container-id>`
+   - Verify port accessibility
 
 ## Contributing
 
-Contributions are welcome! Feel free to open issues or submit pull requests to improve the project.
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request
 
 ## License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+[Your License Here]
 
-## Acknowledgments
+## Authors
 
-- [PyTorch](https://pytorch.org/)
-- [Gradio](https://gradio.app/)
-- [ResNet](https://arxiv.org/abs/1512.03385)
-
+[Your Name/Organization]
